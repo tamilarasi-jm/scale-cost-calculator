@@ -132,7 +132,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
+      <AppHeader 
+        darkMode={darkMode} 
+        onToggleDarkMode={handleToggleDarkMode}
+        results={tableData}
+        projectParams={{
+          size: projectSize,
+          teamSize,
+          timeline,
+          complexity
+        }}
+      />
       
       <div className="flex flex-col lg:flex-row">
         <InputPanel
