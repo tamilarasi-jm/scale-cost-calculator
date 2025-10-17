@@ -62,6 +62,10 @@ const Index = () => {
     setAppState('app');
   };
 
+  const handleBackToHome = () => {
+    setAppState('landing');
+  };
+
   const handleCalculate = () => {
     const params = { projectSize, teamSize, timeline, complexity };
     const newResults = calculateAllModels(params);
@@ -135,6 +139,7 @@ const Index = () => {
       <AppHeader 
         darkMode={darkMode} 
         onToggleDarkMode={handleToggleDarkMode}
+        onBackToHome={handleBackToHome}
         results={tableData}
         projectParams={{
           size: projectSize,

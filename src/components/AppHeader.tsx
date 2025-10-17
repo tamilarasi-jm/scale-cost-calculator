@@ -1,4 +1,4 @@
-import { Calculator, Moon, Sun, Download, Save, History, HelpCircle } from "lucide-react";
+import { Calculator, Moon, Sun, Download, Save, History, HelpCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,6 +21,7 @@ interface EstimationResult {
 interface AppHeaderProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  onBackToHome?: () => void;
   results?: EstimationResult[];
   projectParams?: {
     size: number;
@@ -30,7 +31,7 @@ interface AppHeaderProps {
   };
 }
 
-export const AppHeader = ({ darkMode, onToggleDarkMode, results, projectParams }: AppHeaderProps) => {
+export const AppHeader = ({ darkMode, onToggleDarkMode, onBackToHome, results, projectParams }: AppHeaderProps) => {
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -153,9 +154,22 @@ export const AppHeader = ({ darkMode, onToggleDarkMode, results, projectParams }
   return (
     <header className="border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-10">
       <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-2 font-bold text-lg">
-          <Calculator className="w-6 h-6 text-primary" />
-          <span className="gradient-text">Cost Estimator Pro</span>
+        <div className="flex items-center gap-4">
+          {onBackToHome && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={onBackToHome}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back to Home</span>
+            </Button>
+          )}
+          <div className="flex items-center gap-2 font-bold text-lg">
+            <Calculator className="w-6 h-6 text-primary" />
+            <span className="gradient-text">Cost Estimator Pro</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
