@@ -1,11 +1,14 @@
 import { ArrowRight, Calculator, BarChart3, Download, Save, Moon, Smartphone, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface LandingPageProps {
   onGetStarted: () => void;
 }
 
 export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
+  const navigate = useNavigate();
+  
   const features = [
     {
       icon: <Calculator className="w-6 h-6" />,
@@ -97,7 +100,12 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
               <Button onClick={onGetStarted} size="lg" className="text-lg px-8 py-6">
                 Start Estimating <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="text-lg px-8 py-6"
+                onClick={() => navigate("/learn-more")}
+              >
                 Learn More
               </Button>
             </div>
