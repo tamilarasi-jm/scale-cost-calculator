@@ -18,9 +18,10 @@ interface EstimationResult {
 
 interface ComparisonTableProps {
   results: EstimationResult[];
+  currencySymbol: string;
 }
 
-export const ComparisonTable = ({ results }: ComparisonTableProps) => {
+export const ComparisonTable = ({ results, currencySymbol }: ComparisonTableProps) => {
   return (
     <Card>
       <CardHeader>
@@ -42,7 +43,7 @@ export const ComparisonTable = ({ results }: ComparisonTableProps) => {
               {results.map((result) => (
                 <TableRow key={result.name}>
                   <TableCell className="font-medium">{result.name}</TableCell>
-                  <TableCell className="text-right">${result.cost.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{currencySymbol}{result.cost.toLocaleString()}</TableCell>
                   <TableCell className="text-right">{result.effort.toFixed(1)}</TableCell>
                   <TableCell className="text-right">{result.duration.toFixed(1)}</TableCell>
                   <TableCell className="text-right">

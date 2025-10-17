@@ -19,6 +19,7 @@ const Index = () => {
   const [teamSize, setTeamSize] = useState(5);
   const [timeline, setTimeline] = useState(12);
   const [complexity, setComplexity] = useState<'low' | 'medium' | 'high'>('medium');
+  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
   
   // Calculation results
   const [results, setResults] = useState(() => {
@@ -78,6 +79,15 @@ const Index = () => {
     handleCalculate();
   }, [projectSize, teamSize, timeline, complexity]);
 
+  // Currency conversion rate (1 USD = 83 INR approximately)
+  const convertCurrency = (usdAmount: number) => {
+    return currency === 'INR' ? Math.round(usdAmount * 83) : usdAmount;
+  };
+
+  const getCurrencySymbol = () => {
+    return currency === 'USD' ? '$' : '₹';
+  };
+
   if (appState === 'landing') {
     return <LandingPage onGetStarted={handleGetStarted} />;
   }
@@ -89,21 +99,21 @@ const Index = () => {
   const chartData = [
     {
       name: 'COCOMO II',
-      cost: results.cocomo.cost,
+      cost: convertCurrency(results.cocomo.cost),
       effort: results.cocomo.effort,
       duration: results.cocomo.duration,
       color: 'hsl(var(--cocomo))'
     },
     {
       name: 'SLIM',
-      cost: results.slim.cost,
+      cost: convertCurrency(results.slim.cost),
       effort: results.slim.effort,
       duration: results.slim.duration,
       color: 'hsl(var(--slim))'
     },
     {
       name: 'RCA Price',
-      cost: results.rca.cost,
+      cost: convertCurrency(results.rca.cost),
       effort: results.rca.effort,
       duration: results.rca.duration,
       color: 'hsl(var(--rca))'
@@ -113,21 +123,21 @@ const Index = () => {
   const tableData = [
     {
       name: 'COCOMO II',
-      cost: results.cocomo.cost,
+      cost: convertCurrency(results.cocomo.cost),
       effort: results.cocomo.effort,
       duration: results.cocomo.duration,
       risk: results.cocomo.risk
     },
     {
       name: 'SLIM',
-      cost: results.slim.cost,
+      cost: convertCurrency(results.slim.cost),
       effort: results.slim.effort,
       duration: results.slim.duration,
       risk: results.slim.risk
     },
     {
       name: 'RCA Price',
-      cost: results.rca.cost,
+      cost: convertCurrency(results.rca.cost),
       effort: results.rca.effort,
       duration: results.rca.duration,
       risk: results.rca.risk
@@ -145,7 +155,8 @@ const Index = () => {
           size: projectSize,
           teamSize,
           timeline,
-          complexity
+          complexity,
+          currency
         }}
       />
       
@@ -155,10 +166,12 @@ const Index = () => {
           teamSize={teamSize}
           timeline={timeline}
           complexity={complexity}
+          currency={currency}
           onProjectSizeChange={setProjectSize}
           onTeamSizeChange={setTeamSize}
           onTimelineChange={setTimeline}
           onComplexityChange={(value) => setComplexity(value as 'low' | 'medium' | 'high')}
+          onCurrencyChange={setCurrency}
           onCalculate={handleCalculate}
         />
 
@@ -169,37 +182,40 @@ const Index = () => {
               <ModelCard
                 name="COCOMO II"
                 color="hsl(var(--cocomo))"
-                cost={results.cocomo.cost}
+                cost={convertCurrency(results.cocomo.cost)}
                 effort={results.cocomo.effort}
                 duration={results.cocomo.duration}
                 risk={results.cocomo.risk}
                 isRecommended={recommendedModel === 'cocomo'}
+                currencySymbol={getCurrencySymbol()}
               />
               <ModelCard
                 name="SLIM"
                 color="hsl(var(--slim))"
-                cost={results.slim.cost}
+                cost={convertCurrency(results.slim.cost)}
                 effort={results.slim.effort}
                 duration={results.slim.duration}
                 risk={results.slim.risk}
                 isRecommended={recommendedModel === 'slim'}
+                currencySymbol={getCurrencySymbol()}
               />
               <ModelCard
                 name="RCA Price"
                 color="hsl(var(--rca))"
-                cost={results.rca.cost}
+                cost={convertCurrency(results.rca.cost)}
                 effort={results.rca.effort}
                 duration={results.rca.duration}
                 risk={results.rca.risk}
                 isRecommended={recommendedModel === 'rca'}
+                currencySymbol={getCurrencySymbol()}
               />
             </div>
 
             {/* Comparison Chart */}
-            <ComparisonChart results={chartData} />
+            <ComparisonChart results={chartData} currencySymbol={getCurrencySymbol()} />
 
             {/* Comparison Table */}
-            <ComparisonTable results={tableData} />
+            <ComparisonTable results={tableData} currencySymbol={getCurrencySymbol()} />
           </div>
         </main>
       </div>

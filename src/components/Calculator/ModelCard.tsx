@@ -10,6 +10,7 @@ interface ModelCardProps {
   duration: number;
   risk: 'low' | 'medium' | 'high';
   isRecommended?: boolean;
+  currencySymbol: string;
 }
 
 export const ModelCard = ({
@@ -19,7 +20,8 @@ export const ModelCard = ({
   effort,
   duration,
   risk,
-  isRecommended
+  isRecommended,
+  currencySymbol
 }: ModelCardProps) => {
   const getRiskColor = () => {
     switch (risk) {
@@ -66,7 +68,7 @@ export const ModelCard = ({
         <div className="text-center py-4 bg-muted/30 rounded-lg">
           <div className="text-sm text-muted-foreground mb-1">Estimated Cost</div>
           <div className="text-3xl font-bold" style={{ color }}>
-            ${cost.toLocaleString()}
+            {currencySymbol}{cost.toLocaleString()}
           </div>
         </div>
 

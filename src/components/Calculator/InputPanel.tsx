@@ -2,7 +2,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { Calculator, Info, Flame, Layers, Leaf } from "lucide-react";
+import { Calculator, Info, Flame, Layers, Leaf, DollarSign, IndianRupee } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -15,10 +15,12 @@ interface InputPanelProps {
   teamSize: number;
   timeline: number;
   complexity: string;
+  currency: 'USD' | 'INR';
   onProjectSizeChange: (value: number) => void;
   onTeamSizeChange: (value: number) => void;
   onTimelineChange: (value: number) => void;
   onComplexityChange: (value: string) => void;
+  onCurrencyChange: (value: 'USD' | 'INR') => void;
   onCalculate: () => void;
 }
 
@@ -27,10 +29,12 @@ export const InputPanel = ({
   teamSize,
   timeline,
   complexity,
+  currency,
   onProjectSizeChange,
   onTeamSizeChange,
   onTimelineChange,
   onComplexityChange,
+  onCurrencyChange,
   onCalculate
 }: InputPanelProps) => {
   return (
@@ -185,6 +189,51 @@ export const InputPanel = ({
                 <RadioGroupItem value="high" id="high" className="sr-only" />
                 <Flame className="w-5 h-5" />
                 <span className="text-xs font-medium">High</span>
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        {/* Currency Selection */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">Currency</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-xs">
+                  <p>Select currency for cost estimation (1 USD ≈ 83 INR)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <RadioGroup value={currency} onValueChange={(value) => onCurrencyChange(value as 'USD' | 'INR')}>
+            <div className="grid grid-cols-2 gap-2">
+              <Label
+                htmlFor="usd"
+                className={`flex items-center justify-center gap-2 border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                  currency === 'USD'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <RadioGroupItem value="USD" id="usd" className="sr-only" />
+                <DollarSign className="w-5 h-5" />
+                <span className="text-sm font-medium">USD ($)</span>
+              </Label>
+              <Label
+                htmlFor="inr"
+                className={`flex items-center justify-center gap-2 border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                  currency === 'INR'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <RadioGroupItem value="INR" id="inr" className="sr-only" />
+                <IndianRupee className="w-5 h-5" />
+                <span className="text-sm font-medium">INR (₹)</span>
               </Label>
             </div>
           </RadioGroup>

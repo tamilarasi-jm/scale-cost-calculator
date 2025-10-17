@@ -28,6 +28,7 @@ interface AppHeaderProps {
     teamSize: number;
     timeline: number;
     complexity: string;
+    currency: 'USD' | 'INR';
   };
 }
 
@@ -76,19 +77,22 @@ export const AppHeader = ({ darkMode, onToggleDarkMode, onBackToHome, results, p
         doc.text(`Team Size: ${projectParams.teamSize} people`, 14, 54);
         doc.text(`Timeline: ${projectParams.timeline} months`, 14, 60);
         doc.text(`Complexity: ${projectParams.complexity}`, 14, 66);
+        doc.text(`Currency: ${projectParams.currency}`, 14, 72);
       }
       
       // Estimation Results Table
       doc.setFontSize(14);
       doc.setTextColor(30, 41, 59);
-      doc.text("Estimation Results", 14, 80);
+      doc.text("Estimation Results", 14, 85);
+      
+      const currencySymbol = projectParams?.currency === 'INR' ? '₹' : '$';
       
       autoTable(doc, {
-        startY: 85,
+        startY: 90,
         head: [['Model', 'Cost', 'Effort (PM)', 'Duration (mo)', 'Risk']],
         body: results.map(result => [
           result.name,
-          `$${result.cost.toLocaleString()}`,
+          `${currencySymbol}${result.cost.toLocaleString()}`,
           result.effort.toFixed(1),
           result.duration.toFixed(1),
           result.risk.toUpperCase()
@@ -120,7 +124,7 @@ export const AppHeader = ({ darkMode, onToggleDarkMode, onBackToHome, results, p
       
       doc.setFontSize(10);
       doc.setTextColor(16, 185, 129);
-      doc.text(`✓ ${recommended.name} offers the best cost estimate at $${recommended.cost.toLocaleString()}`, 14, finalY + 23);
+      doc.text(`✓ ${recommended.name} offers the best cost estimate at ${currencySymbol}${recommended.cost.toLocaleString()}`, 14, finalY + 23);
       
       // Footer
       doc.setFontSize(8);

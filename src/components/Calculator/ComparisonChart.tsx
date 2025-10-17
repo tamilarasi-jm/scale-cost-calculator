@@ -12,9 +12,10 @@ interface EstimationResult {
 
 interface ComparisonChartProps {
   results: EstimationResult[];
+  currencySymbol: string;
 }
 
-export const ComparisonChart = ({ results }: ComparisonChartProps) => {
+export const ComparisonChart = ({ results, currencySymbol }: ComparisonChartProps) => {
   const costData = results.map(r => ({ name: r.name, value: r.cost }));
   const effortData = results.map(r => ({ name: r.name, value: r.effort }));
   const durationData = results.map(r => ({ name: r.name, value: r.duration }));
@@ -25,7 +26,7 @@ export const ComparisonChart = ({ results }: ComparisonChartProps) => {
         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
           <p className="font-semibold">{payload[0].payload.name}</p>
           <p className="text-sm text-muted-foreground">
-            {payload[0].name === 'Cost' && `$${payload[0].value.toLocaleString()}`}
+            {payload[0].name === 'Cost' && `${currencySymbol}${payload[0].value.toLocaleString()}`}
             {payload[0].name === 'Effort' && `${payload[0].value.toFixed(1)} PM`}
             {payload[0].name === 'Duration' && `${payload[0].value.toFixed(1)} months`}
           </p>
