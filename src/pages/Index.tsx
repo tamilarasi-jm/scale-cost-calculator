@@ -7,12 +7,20 @@ import { ModelCard } from "@/components/Calculator/ModelCard";
 import { ComparisonChart } from "@/components/Calculator/ComparisonChart";
 import { ComparisonTable } from "@/components/Calculator/ComparisonTable";
 import { calculateAllModels, getRecommendedModel } from "@/utils/estimationModels";
+import { FeatureList } from "@/components/Calculator/FeatureInput";
+import { AdvancedResultsView } from "@/components/Calculator/AdvancedResultsView";
+import { UnifiedComparisonTable } from "@/components/Calculator/UnifiedComparisonTable";
+import { calculateFeatureEstimations, aggregateFeatureEstimations, FeatureInput as FeatureInputType } from "@/utils/advancedEstimationModels";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BarChart3, ListTree } from "lucide-react";
 
 type AppState = 'landing' | 'loading' | 'app';
 
 const Index = () => {
   const [appState, setAppState] = useState<AppState>('landing');
   const [darkMode, setDarkMode] = useState(false);
+  const [estimationMode, setEstimationMode] = useState<'project' | 'feature'>('project');
   
   // Project parameters
   const [projectSize, setProjectSize] = useState(50);
@@ -20,6 +28,9 @@ const Index = () => {
   const [timeline, setTimeline] = useState(12);
   const [complexity, setComplexity] = useState<'low' | 'medium' | 'high'>('medium');
   const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
+  
+  // Feature-based estimation
+  const [features, setFeatures] = useState<FeatureInputType[]>([]);
   
   // Calculation results
   const [results, setResults] = useState(() => {
@@ -88,6 +99,10 @@ const Index = () => {
     return currency === 'USD' ? '$' : '₹';
   };
 
+  // Calculate feature-level results
+  const featureResults = features.map(calculateFeatureEstimations);
+  const aggregatedResults = features.length > 0 ? aggregateFeatureEstimations(features) : null;
+
   if (appState === 'landing') {
     return <LandingPage onGetStarted={handleGetStarted} />;
   }
@@ -144,6 +159,35 @@ const Index = () => {
     }
   ];
 
+  // Unified comparison data (all 6 models)
+  const unifiedTableData = aggregatedResults ? [
+    ...tableData,
+    {
+      name: 'FPA',
+      cost: convertCurrency(aggregatedResults.fpa.totalCost),
+      effort: aggregatedResults.fpa.totalEffort,
+      duration: aggregatedResults.fpa.totalDuration / 30, // Convert days to months
+      risk: 'medium',
+      additionalMetrics: {}
+    },
+    {
+      name: 'PERT',
+      cost: convertCurrency(aggregatedResults.pert.totalCost),
+      effort: aggregatedResults.pert.totalEffort,
+      duration: aggregatedResults.pert.totalDuration / 30, // Convert days to months
+      risk: aggregatedResults.pert.avgRisk,
+      additionalMetrics: {}
+    },
+    {
+      name: 'Story Points',
+      cost: convertCurrency(aggregatedResults.storyPoints.totalCost),
+      effort: aggregatedResults.storyPoints.totalEffort,
+      duration: aggregatedResults.storyPoints.totalDuration / 30, // Convert days to months
+      risk: 'low',
+      additionalMetrics: { sprints: aggregatedResults.storyPoints.totalSprints }
+    }
+  ] : tableData;
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader 
@@ -177,45 +221,73 @@ const Index = () => {
 
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Model Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <ModelCard
-                name="COCOMO II"
-                color="hsl(var(--cocomo))"
-                cost={convertCurrency(results.cocomo.cost)}
-                effort={results.cocomo.effort}
-                duration={results.cocomo.duration}
-                risk={results.cocomo.risk}
-                isRecommended={recommendedModel === 'cocomo'}
-                currencySymbol={getCurrencySymbol()}
-              />
-              <ModelCard
-                name="SLIM"
-                color="hsl(var(--slim))"
-                cost={convertCurrency(results.slim.cost)}
-                effort={results.slim.effort}
-                duration={results.slim.duration}
-                risk={results.slim.risk}
-                isRecommended={recommendedModel === 'slim'}
-                currencySymbol={getCurrencySymbol()}
-              />
-              <ModelCard
-                name="RCA Price"
-                color="hsl(var(--rca))"
-                cost={convertCurrency(results.rca.cost)}
-                effort={results.rca.effort}
-                duration={results.rca.duration}
-                risk={results.rca.risk}
-                isRecommended={recommendedModel === 'rca'}
-                currencySymbol={getCurrencySymbol()}
-              />
-            </div>
+            <Tabs value={estimationMode} onValueChange={(value) => setEstimationMode(value as 'project' | 'feature')}>
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
+                <TabsTrigger value="project" className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Project-Level
+                </TabsTrigger>
+                <TabsTrigger value="feature" className="flex items-center gap-2">
+                  <ListTree className="w-4 h-4" />
+                  Feature-Based (All 6 Models)
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Comparison Chart */}
-            <ComparisonChart results={chartData} currencySymbol={getCurrencySymbol()} />
+              <TabsContent value="project" className="space-y-6">
+                {/* Model Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <ModelCard
+                    name="COCOMO II"
+                    color="hsl(var(--cocomo))"
+                    cost={convertCurrency(results.cocomo.cost)}
+                    effort={results.cocomo.effort}
+                    duration={results.cocomo.duration}
+                    risk={results.cocomo.risk}
+                    isRecommended={recommendedModel === 'cocomo'}
+                    currencySymbol={getCurrencySymbol()}
+                  />
+                  <ModelCard
+                    name="SLIM"
+                    color="hsl(var(--slim))"
+                    cost={convertCurrency(results.slim.cost)}
+                    effort={results.slim.effort}
+                    duration={results.slim.duration}
+                    risk={results.slim.risk}
+                    isRecommended={recommendedModel === 'slim'}
+                    currencySymbol={getCurrencySymbol()}
+                  />
+                  <ModelCard
+                    name="RCA Price"
+                    color="hsl(var(--rca))"
+                    cost={convertCurrency(results.rca.cost)}
+                    effort={results.rca.effort}
+                    duration={results.rca.duration}
+                    risk={results.rca.risk}
+                    isRecommended={recommendedModel === 'rca'}
+                    currencySymbol={getCurrencySymbol()}
+                  />
+                </div>
 
-            {/* Comparison Table */}
-            <ComparisonTable results={tableData} currencySymbol={getCurrencySymbol()} />
+                {/* Comparison Chart */}
+                <ComparisonChart results={chartData} currencySymbol={getCurrencySymbol()} />
+
+                {/* Comparison Table */}
+                <ComparisonTable results={tableData} currencySymbol={getCurrencySymbol()} />
+              </TabsContent>
+
+              <TabsContent value="feature" className="space-y-6">
+                <FeatureList features={features} onFeaturesChange={setFeatures} />
+                
+                {features.length > 0 && (
+                  <>
+                    <AdvancedResultsView results={featureResults} currencySymbol={getCurrencySymbol()} />
+                    {aggregatedResults && (
+                      <UnifiedComparisonTable results={unifiedTableData} currencySymbol={getCurrencySymbol()} />
+                    )}
+                  </>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>
