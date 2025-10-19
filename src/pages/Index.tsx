@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { LandingPage } from "@/components/LandingPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { AppHeader } from "@/components/AppHeader";
 import { InputPanel } from "@/components/Calculator/InputPanel";
 import { ModelCard } from "@/components/Calculator/ModelCard";
 import { ComparisonChart } from "@/components/Calculator/ComparisonChart";
@@ -17,9 +16,13 @@ import { BarChart3, ListTree } from "lucide-react";
 
 type AppState = 'landing' | 'loading' | 'app';
 
-const Index = () => {
+interface IndexProps {
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
+}
+
+const Index = ({ darkMode, onToggleDarkMode }: IndexProps) => {
   const [appState, setAppState] = useState<AppState>('landing');
-  const [darkMode, setDarkMode] = useState(false);
   const [estimationMode, setEstimationMode] = useState<'project' | 'feature'>('project');
   
   // Project parameters
@@ -44,27 +47,6 @@ const Index = () => {
   });
   
   const [recommendedModel, setRecommendedModel] = useState<'cocomo' | 'slim' | 'rca'>('cocomo');
-
-  // Load dark mode preference
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(savedDarkMode);
-    if (savedDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  const handleToggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    localStorage.setItem('darkMode', newDarkMode.toString());
-    
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
 
   const handleGetStarted = () => {
     setAppState('loading');
@@ -104,7 +86,7 @@ const Index = () => {
   const aggregatedResults = features.length > 0 ? aggregateFeatureEstimations(features) : null;
 
   if (appState === 'landing') {
-    return <LandingPage onGetStarted={handleGetStarted} />;
+    return <LandingPage onGetStarted={handleGetStarted} darkMode={darkMode} onToggleDarkMode={onToggleDarkMode} />;
   }
 
   if (appState === 'loading') {
@@ -190,19 +172,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader 
-        darkMode={darkMode} 
-        onToggleDarkMode={handleToggleDarkMode}
-        onBackToHome={handleBackToHome}
-        results={tableData}
-        projectParams={{
-          size: projectSize,
-          teamSize,
-          timeline,
-          complexity,
-          currency
-        }}
-      />
+      <div className="h-16" /> {/* Spacer for fixed header */}
       
       <div className="flex flex-col lg:flex-row">
         <InputPanel

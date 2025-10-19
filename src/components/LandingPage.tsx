@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
-export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
+export const LandingPage = ({ onGetStarted, darkMode, onToggleDarkMode }: LandingPageProps) => {
   const navigate = useNavigate();
   
   const features = [
