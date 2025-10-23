@@ -8,6 +8,8 @@ import { AppHeader } from "@/components/AppHeader";
 import Index from "./pages/Index";
 import LearnMore from "./pages/LearnMore";
 import NotFound from "./pages/NotFound";
+import PertVisualization from "./pages/PertVisualization";
+import CostSummary from "./pages/CostSummary";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,8 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Index darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />} />
         <Route path="/learn-more" element={<LearnMore />} />
+        <Route path="/pert-visualization" element={<PertVisualization />} />
+        <Route path="/cost-summary" element={<CostSummary />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -1,4 +1,5 @@
-import { Calculator, Moon, Sun, Download, Save, History, HelpCircle, ArrowLeft } from "lucide-react";
+import { Calculator, Moon, Sun, Download, Save, History, HelpCircle, ArrowLeft, Network } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,6 +35,7 @@ interface AppHeaderProps {
 
 export const AppHeader = ({ darkMode, onToggleDarkMode, onBackToHome, results, projectParams }: AppHeaderProps) => {
   const { toast } = useToast();
+  const location = useLocation();
 
   const handleSave = () => {
     toast({
@@ -175,6 +177,26 @@ export const AppHeader = ({ darkMode, onToggleDarkMode, onBackToHome, results, p
             <span className="gradient-text">Cost Estimator Pro</span>
           </div>
         </div>
+
+        <nav className="hidden md:flex items-center gap-1">
+          <Button
+            variant={location.pathname === '/' ? 'default' : 'ghost'}
+            size="sm"
+            asChild
+          >
+            <Link to="/">Dashboard</Link>
+          </Button>
+          <Button
+            variant={location.pathname === '/pert-visualization' ? 'default' : 'ghost'}
+            size="sm"
+            asChild
+          >
+            <Link to="/pert-visualization" className="flex items-center gap-2">
+              <Network className="w-4 h-4" />
+              PERT Visualization
+            </Link>
+          </Button>
+        </nav>
 
         <div className="flex items-center gap-2">
           <Button
