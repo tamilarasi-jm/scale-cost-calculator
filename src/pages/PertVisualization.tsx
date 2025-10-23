@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Download, FileImage, Clock, TrendingUp, Activity } from 'lucide-react';
+import { Download, FileImage, Clock, TrendingUp, Activity, Network } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
+import PertInputForm, { PertTask } from '@/components/Calculator/PertInputForm';
 
 type DiagramType = 'aoa' | 'aon';
 
@@ -24,22 +25,92 @@ interface PertNode {
 
 export default function PertVisualization() {
   const [diagramType, setDiagramType] = useState<DiagramType>('aon');
+  const [tasks, setTasks] = useState<PertTask[]>([]);
+  const [pertNodes, setPertNodes] = useState<PertNode[]>([]);
+  const [showVisualization, setShowVisualization] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Sample PERT data - in real implementation, this would come from props or context
-  const pertNodes: PertNode[] = [
-    { id: 'A', name: 'Requirements', es: 0, ef: 5, ls: 0, lf: 5, slack: 0, isCritical: true },
-    { id: 'B', name: 'Design', es: 5, ef: 12, ls: 5, lf: 12, slack: 0, isCritical: true },
-    { id: 'C', name: 'Development', es: 12, ef: 30, ls: 12, lf: 30, slack: 0, isCritical: true },
-    { id: 'D', name: 'Testing', es: 30, ef: 38, ls: 30, lf: 38, slack: 0, isCritical: true },
-    { id: 'E', name: 'Deployment', es: 38, ef: 42, ls: 38, lf: 42, slack: 0, isCritical: true },
-    { id: 'F', name: 'Documentation', es: 12, ef: 20, ls: 22, lf: 30, slack: 10, isCritical: false },
-  ];
+  const calculatePertNetwork = (inputTasks: PertTask[]) => {
+    if (inputTasks.length === 0) {
+      toast({
+        title: 'No Tasks',
+        description: 'Please add tasks before generating the PERT diagram',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-  const totalDuration = 42;
-  const criticalPath = ['A', 'B', 'C', 'D', 'E'];
-  const variance = 2.5;
+    // Calculate ES and EF (forward pass)
+    const nodes: PertNode[] = inputTasks.map((task, index) => {
+      let es = 0;
+      
+      // If task has dependencies, ES is the maximum EF of all dependencies
+      if (task.dependencies.length > 0) {
+        task.dependencies.forEach(depId => {
+          const depTask = inputTasks.find(t => t.id === depId);
+          if (depTask) {
+            const depIndex = inputTasks.indexOf(depTask);
+            if (depIndex < index) {
+              const depNode = nodes[depIndex];
+              es = Math.max(es, depNode.ef);
+            }
+          }
+        });
+      }
+      
+      const ef = es + task.expectedTime;
+      
+      return {
+        id: task.id,
+        name: task.taskName,
+        es,
+        ef,
+        ls: 0,
+        lf: 0,
+        slack: 0,
+        isCritical: false,
+      };
+    });
+
+    // Calculate project duration
+    const projectDuration = Math.max(...nodes.map(n => n.ef));
+
+    // Calculate LS and LF (backward pass)
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const node = nodes[i];
+      const task = inputTasks[i];
+      
+      // Find all tasks that depend on this task
+      const dependents = nodes.filter((n, idx) => 
+        inputTasks[idx].dependencies.includes(task.id)
+      );
+      
+      if (dependents.length === 0) {
+        // If no dependents, this is an end task
+        node.lf = projectDuration;
+      } else {
+        // LF is the minimum LS of all dependent tasks
+        node.lf = Math.min(...dependents.map(d => d.ls));
+      }
+      
+      node.ls = node.lf - task.expectedTime;
+      node.slack = node.ls - node.es;
+      node.isCritical = Math.abs(node.slack) < 0.01;
+    }
+
+    setPertNodes(nodes);
+    setShowVisualization(true);
+    
+    toast({
+      title: 'PERT Diagram Generated',
+      description: `Network created with ${nodes.length} tasks`,
+    });
+  };
+
+  const totalDuration = pertNodes.length > 0 ? Math.max(...pertNodes.map(n => n.ef)) : 0;
+  const criticalPath = pertNodes.filter(n => n.isCritical).map(n => n.id);
+  const variance = tasks.reduce((sum, task) => sum + task.variance, 0);
 
   const handleExportPDF = () => {
     try {
@@ -94,20 +165,50 @@ export default function PertVisualization() {
             <h1 className="text-4xl font-bold gradient-text mb-2">PERT Visualization</h1>
             <p className="text-muted-foreground">Project Evaluation and Review Technique</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleExportPDF}>
-              <Download className="w-4 h-4 mr-2" />
-              Export PDF
-            </Button>
-            <Button variant="outline" onClick={handleExportImage}>
-              <FileImage className="w-4 h-4 mr-2" />
-              Export Image
-            </Button>
-          </div>
+          {showVisualization && (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleExportPDF}>
+                <Download className="w-4 h-4 mr-2" />
+                Export PDF
+              </Button>
+              <Button variant="outline" onClick={handleExportImage}>
+                <FileImage className="w-4 h-4 mr-2" />
+                Export Image
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Diagram Type Toggle */}
-        <Card className="p-6 bg-card/95 backdrop-blur border-border/50">
+        {/* Input Form */}
+        <PertInputForm tasks={tasks} onTasksChange={setTasks} />
+
+        {/* Generate PERT Button */}
+        {tasks.length > 0 && !showVisualization && (
+          <div className="flex justify-center">
+            <Button 
+              size="lg" 
+              onClick={() => calculatePertNetwork(tasks)}
+              className="gap-2"
+            >
+              <Network className="w-5 h-5" />
+              Generate PERT Diagram
+            </Button>
+          </div>
+        )}
+
+        {showVisualization && tasks.length > 0 && (
+          <>
+            <div className="flex justify-center">
+              <Button 
+                variant="outline"
+                onClick={() => setShowVisualization(false)}
+              >
+                Back to Input Form
+              </Button>
+            </div>
+
+            {/* Diagram Type Toggle */}
+            <Card className="p-6 bg-card/95 backdrop-blur border-border/50">
           <RadioGroup
             value={diagramType}
             onValueChange={(value) => setDiagramType(value as DiagramType)}
@@ -122,11 +223,11 @@ export default function PertVisualization() {
               <Label htmlFor="aoa" className="cursor-pointer">Activity on Arrow (AoA)</Label>
             </div>
           </RadioGroup>
-        </Card>
+            </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Interactive Diagram */}
-          <Card className="lg:col-span-2 p-6 bg-card/95 backdrop-blur border-border/50">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Interactive Diagram */}
+              <Card className="lg:col-span-2 p-6 bg-card/95 backdrop-blur border-border/50">
             <h2 className="text-xl font-semibold mb-4">
               {diagramType === 'aon' ? 'Activity on Node' : 'Activity on Arrow'} Diagram
             </h2>
@@ -218,10 +319,10 @@ export default function PertVisualization() {
                 </div>
               )}
             </div>
-          </Card>
+              </Card>
 
-          {/* Summary Card */}
-          <div className="space-y-6">
+              {/* Summary Card */}
+              <div className="space-y-6">
             <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 backdrop-blur border-primary/20">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" />
@@ -273,20 +374,20 @@ export default function PertVisualization() {
                   <div className="text-xl font-bold">{variance}</div>
                 </div>
               </div>
-            </Card>
+                </Card>
 
-            <Button 
-              className="w-full" 
-              size="lg"
-              onClick={() => navigate('/cost-summary')}
-            >
-              View Detailed Cost Summary
-            </Button>
-          </div>
-        </div>
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={() => navigate('/cost-summary')}
+                >
+                  View Detailed Cost Summary
+                </Button>
+              </div>
+            </div>
 
-        {/* Legend */}
-        <Card className="p-4 bg-card/95 backdrop-blur border-border/50">
+            {/* Legend */}
+            <Card className="p-4 bg-card/95 backdrop-blur border-border/50">
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-error/20 border-2 border-error rounded" />
@@ -300,8 +401,10 @@ export default function PertVisualization() {
               <div className="w-4 h-4 bg-success/20 border-2 border-success rounded" />
               <span>Safe Slack (≥ 5 days)</span>
             </div>
-          </div>
-        </Card>
+              </div>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );
