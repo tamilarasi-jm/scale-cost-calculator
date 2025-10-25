@@ -5,11 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/AppHeader";
+import { EVMDataProvider } from "@/contexts/EVMDataContext";
 import Index from "./pages/Index";
 import LearnMore from "./pages/LearnMore";
 import NotFound from "./pages/NotFound";
 import PertVisualization from "./pages/PertVisualization";
 import CostSummary from "./pages/CostSummary";
+import EVMCalculator from "./pages/EVMCalculator";
+import KPIDashboard from "./pages/KPIDashboard";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +57,8 @@ const AppContent = () => {
         <Route path="/learn-more" element={<LearnMore />} />
         <Route path="/pert-visualization" element={<PertVisualization />} />
         <Route path="/cost-summary" element={<CostSummary />} />
+        <Route path="/evm-calculator" element={<EVMCalculator />} />
+        <Route path="/kpi-dashboard" element={<KPIDashboard />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -64,11 +69,13 @@ const AppContent = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <EVMDataProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </EVMDataProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

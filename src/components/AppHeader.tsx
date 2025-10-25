@@ -1,4 +1,4 @@
-import { Calculator, Moon, Sun, Download, Save, History, HelpCircle, ArrowLeft, Network } from "lucide-react";
+import { Calculator, Moon, Sun, Download, Save, History, HelpCircle, ArrowLeft, Network, DollarSign, BarChart3 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -193,7 +193,27 @@ export const AppHeader = ({ darkMode, onToggleDarkMode, onBackToHome, results, p
           >
             <Link to="/pert-visualization" className="flex items-center gap-2">
               <Network className="w-4 h-4" />
-              PERT Visualization
+              PERT
+            </Link>
+          </Button>
+          <Button
+            variant={location.pathname === '/evm-calculator' ? 'default' : 'ghost'}
+            size="sm"
+            asChild
+          >
+            <Link to="/evm-calculator" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              EVM Calculator
+            </Link>
+          </Button>
+          <Button
+            variant={location.pathname === '/kpi-dashboard' ? 'default' : 'ghost'}
+            size="sm"
+            asChild
+          >
+            <Link to="/kpi-dashboard" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              KPI Dashboard
             </Link>
           </Button>
         </nav>
