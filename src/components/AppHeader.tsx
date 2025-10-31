@@ -1,4 +1,4 @@
-import { Calculator, Moon, Sun, Download, Save, History, HelpCircle, ArrowLeft, Network, DollarSign, BarChart3 } from "lucide-react";
+import { Calculator, Moon, Sun, Download, Save, History, HelpCircle, ArrowLeft, Network, DollarSign, BarChart3, GitCompare } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -214,6 +214,16 @@ export const AppHeader = ({ darkMode, onToggleDarkMode, onBackToHome, results, p
             <Link to="/kpi-dashboard" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               KPI Dashboard
+            </Link>
+          </Button>
+          <Button
+            variant={location.pathname === '/diagram-comparison' ? 'default' : 'ghost'}
+            size="sm"
+            asChild
+          >
+            <Link to="/diagram-comparison" className="flex items-center gap-2">
+              <GitCompare className="w-4 h-4" />
+              AOA vs AON
             </Link>
           </Button>
         </nav>

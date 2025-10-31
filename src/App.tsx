@@ -13,6 +13,7 @@ import PertVisualization from "./pages/PertVisualization";
 import CostSummary from "./pages/CostSummary";
 import EVMCalculator from "./pages/EVMCalculator";
 import KPIDashboard from "./pages/KPIDashboard";
+import DiagramComparison from "./pages/DiagramComparison";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const AppContent = () => {
         <Route path="/cost-summary" element={<CostSummary />} />
         <Route path="/evm-calculator" element={<EVMCalculator />} />
         <Route path="/kpi-dashboard" element={<KPIDashboard />} />
+        <Route path="/diagram-comparison" element={<DiagramComparison />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
